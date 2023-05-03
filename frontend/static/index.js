@@ -1,6 +1,6 @@
 let locationDiv = document.getElementById('location')
 let responseDiv = document.getElementById('transitResponse')
-
+let baseURL = `https://transitping-mtapi.onrender.com`
 
 // extract a function to get coordinates
 function getCoordinates() {
@@ -49,7 +49,7 @@ function displayTrainData(data) {
       output += `<p>Route: ${route}&nbsp;&nbsp;&nbsp;ETA: ${eta} mins</p>`;
 
     }
-    console.log(trainsN)
+    //console.log(trainsN)
     output += `</div>`;
 
     // southbound trains
@@ -88,7 +88,7 @@ function displayTrainData(data) {
 getCoordinates()
   .then(position => {
     let { latitude, longitude } = position.coords;
-    return fetch(`http://localhost:5000/by-location?lat=${latitude}&lon=${longitude}`);
+    return fetch(`${baseURL}/by-location?lat=${latitude}&lon=${longitude}`);
   }).then(response => response.json())
   .then(jsonData => {
     displayTrainData(jsonData.data);
