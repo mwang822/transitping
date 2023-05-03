@@ -1,0 +1,52 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.stations {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.station {
+  padding: 20px;
+  background-color: #f2f2f2;
+  box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.station h2 {
+  font-size: 24px;
+  margin-bottom: 10px;
+}
+
+.station .direction {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.station .direction h3 {
+  font-size: 18px;
+}
+
+.station .direction pre {
+  font-size: 16px;
+  margin-bottom: 5px;
+}
