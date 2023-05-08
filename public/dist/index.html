@@ -1,72 +1,22 @@
 <!DOCTYPE html>
 <html>
-<head>
+<head
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Train Times</title>
-  <!--link rel="stylesheet" type="text/css" href="styles.css"-->
-  <script src="main.js" charset="utf-8"></script>
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: sans-serif;
-    }
-
-    .container {
-      max-width: 800px;
-      margin: 0 auto;
-      padding: 20px;
-    }
-
-    h1 {
-      text-align: center;
-      margin-bottom: 20px;
-    }
-
-    .stations {
-      display: flex;
-      flex-direction: column;
-      gap: 20px;
-      text-align: center;
-    }
-
-    .stations p {
-      font-weight: bold;
-      text-align: center;
-    }
-
-    .station {
-      padding: 20px;
-      border-radius: 5px;
-    }
-    
-    .north {
-      background-color: lightblue;
-    }
-
-    .south {
-      background-color: lightgreen;
-    }
-
-    .direction {
-      margin-top: 10px;
-      font-weight: bold;
-    }
-</style>
+  <link rel="stylesheet" type="text/css" href="styles.css">
+  <script defer src="main.js"></script>
 </head>
 <body>
+ <div id="status">Getting Location</div>
  <div class="container">
     <h1>Train Times</h1>
     <div class="stations" id="transitResponse">
+        <div class="stations">
       <!-- Data will be dynamically generated here -->
+        </div>
     </div>
   </div>
   <div id="location"></div>
-  <div id="transitResponse"></div>
   <div id="quotes"></div>
 </body>

@@ -1,8 +1,8 @@
 //const locationDiv = document.getElementById('location');
 const responseDiv = document.getElementById('transitResponse');
 const statusDiv = document.getElementById('status');
-let transitURL = `https://transitping-mtapi.onrender.com/by-location`;
-const mapsURL = `https://dev.virtualearth.net/REST/v1/Routes/walking`;
+let baseURL = `https://transitping-mtapi.onrender.com`;
+console.log(process.env.MAP_API_KEY);
 //console.log(document.getElementById('transitResponse');
 
 
@@ -13,59 +13,44 @@ function getCoordinates() {
   });
 }
 
-
-
-
-//function for getting mtapi data, returns essentially a promise
-function getTransitData(coords){
-  const params = new URLSearchParams();
-  params.append(`lat`,coords.lat);
-  params.append(`lon`,coords.lon);
-  return fetch(`${transitURL}?${params.toString()}`);
-}
-
-
-//function for getting walk time
-
-function getWalkTime(startCoords, endCoords) {
+async function getWalkTime(startCoords, endCoords) {
+  const mapsURL = `https://dev.virtualearth.net/REST/v1/Routes/walking`;
   const params = new URLSearchParams();
   params.append(`wayPoint.1`,`${startCoords.lat},${startCoords.lon}`);
   params.append(`wayPoint.2`,`${endCoords.lat},${endCoords.lon}`);
   params.append(`ra`,`routeSummariesOnly`);
+  //REMOVE ON PROD
   params.append(`key`, process.env.MAP_API_KEY);
-  return fetch(`${mapsURL}?${params.toString()}`);
+  console.log(`${mapsURL}?${params.toString()}`);
+  let time = await fetch(`${mapsURL}?${params.toString()}`);
+  return time;
 }
 
-//function for display data
+// extract a function to display train data
+function displayTrainData(data) {
+  //let responseDiv = document.getElementById('transitResponse');
+  let output = ""
 
-async function displayData() {
-  let position = await getCoordinates();
-  let transitData = await getTransitData({"lat":position.coords.latitude,"lon":position.coords.longitude});
-  let data = await transitData.json();
-  //console.log(data.data);
-  
-
-  data = data.data;
-  //loop through data and format
-  //
-
-  let output = "";
   // iterate over the first 3 stations
   for (let i = 0; i < 3; i++) {
     let north, south, trainsN = {}, trainsS = {};
     north = data[i].N;
     south = data[i].S;
-    walkTimeRes = await getWalkTime({
-      "lat": position.coords.latitude,
-      "lon": position.coords.longitude
-    }, {"lat":data[i].location[0],"lon":data[i].location[1]});
-    let timeJson = await walkTimeRes.json();
-    let time = Math.round(timeJson.resourceSets[0].resources[0].travelDuration/60);
-
-
+    //time = getWalkTime({
+    //  "lat": userLat,
+    //  "lon": userLon
+    //}, {"lat":data[i].location[0],"lon":data[i].location[1]})
+    //  .then(response => response.json())
+    // .then(jsonData => {
+    //    console.log(jsonData);
+    //    time = Math.round(jsonData.resourceSets[0].resources[0].travelDuration/60);
+        //document.getElementsByClassName("station-name")[i].innerHTML += `&nbsp;&nbsp;&nbsp;&nbsp;&#128694;${time}mins`;
+        //responseDiv.innerHTML += `<p class=station-name>&#128694;${time}</p>`
+    //  });
+    //console.log(time)
     // generate HTML for station
-    output += `<div class="station ${data[i].name.toLowerCase().replace(/\s+/g, '-')}>`;
-    output += `<p class="station-name">${data[i].name}&nbsp;&nbsp;&nbsp;&nbsp;&#128694;${time}mins</p>`;
+    output += `<div class="station ${data[i].name.toLowerCase().replace(/\s+/g, '-')}">`;
+    output += `<p class="station-name">${data[i].name}</p>`;
 
     // northbound trains
     output += `<div class="direction north">`;
@@ -89,9 +74,11 @@ async function displayData() {
         
       }
       eta = eta.substring(0,eta.length-2);
+      //console.log(eta)
       output += `<p>Route: ${route}&nbsp;&nbsp;&nbsp;ETA: ${eta} mins</p>`;
 
     }
+    //console.log(trainsN)
     output += `</div>`;
 
     // southbound trains
@@ -121,14 +108,22 @@ async function displayData() {
     output += `</div>`;
     output += `</div>`;
   }
+  console.log(document.getElementById('transitResponse'));
   statusDiv.remove();
   responseDiv.innerHTML = `<div class="stations">${output}</div>`;
 }
 
 
-displayData().catch(error => statusDiv.innerHTML = error);
-
-
-
-
-
+// call the functions
+getCoordinates()
+  .then(position => {
+    userLat = position.coords.latitude;
+    userLon = position.coords.longitude;
+    statusDiv.innerHTML = `Getting location`;
+    let { latitude, longitude } = position.coords;
+    return fetch(`${baseURL}/by-location?lat=${latitude}&lon=${longitude}`);
+  }).then(response => response.json())
+  .then(jsonData => {
+    displayTrainData(jsonData.data);
+  })
+  .catch(error => console.log(error));

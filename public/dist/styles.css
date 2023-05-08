@@ -1,0 +1,50 @@
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: sans-serif;
+}
+
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+h1 {
+  text-align: center;
+  margin-bottom: 20px;
+}
+
+.stations {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  text-align: center;
+}
+
+.stations p {
+  font-weight: bold;
+  text-align: center;
+}
+
+.station {
+  padding: 20px;
+  border-radius: 5px;
+}
+
+.north {
+  background-color: lightblue;
+}
+
+.south {
+  background-color: lightgreen;
+}
+
+.direction {
+  margin-top: 10px;
+  font-weight: bold;
+}
