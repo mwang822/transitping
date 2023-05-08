@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <html>
-<head
+<head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Train Times</title>
@@ -8,15 +8,15 @@
   <script defer src="main.js"></script>
 </head>
 <body>
- <div id="status">Getting Location</div>
  <div class="container">
-    <h1>Train Times</h1>
-    <div class="stations" id="transitResponse">
-        <div class="stations">
+    <button class="collapsible">Nearby Train Stations</button>
+    <div class="content" id="trainResponse">
       <!-- Data will be dynamically generated here -->
         </div>
-    </div>
+    <button class="collapsible">Nearby Bus Stops</button> 
+    <div class="content" id="busResponse">
+      <!-- Data will be dynamically generated here -->
+        </div>
   </div>
-  <div id="location"></div>
-  <div id="quotes"></div>
+  <div id="status">Getting Location</div>
 </body>

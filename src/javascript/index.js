@@ -1,10 +1,25 @@
-//const locationDiv = document.getElementById('location');
-const responseDiv = document.getElementById('transitResponse');
+const trainResDiv = document.getElementById('trainResponse');
+const busResDiv = document.getElementById('busResponse');
 const statusDiv = document.getElementById('status');
 let transitURL = `https://transitping-mtapi.onrender.com/by-location`;
 const mapsURL = `https://dev.virtualearth.net/REST/v1/Routes/walking`;
-//console.log(document.getElementById('transitResponse');
 
+document.addEventListener('DOMContentLoaded', function () {
+  // Display the button and content after the page finishes loading
+  document.querySelector('.collapsible').style.display = 'block';
+  document.querySelector('.content').style.display = 'block';
+
+  // Add click event listener to toggle the collapsible content
+  document.querySelector('.collapsible').addEventListener('click', function() {
+    this.classList.toggle('active');
+    var content = this.nextElementSibling;
+    if (content.style.display === 'block') {
+      content.style.display = 'none';
+    } else {
+      content.style.display = 'block';
+    }
+  });
+});
 
 // extract a function to get coordinates
 function getCoordinates() {
@@ -17,7 +32,7 @@ function getCoordinates() {
 
 
 //function for getting mtapi data, returns essentially a promise
-function getTransitData(coords){
+function getTrainData(coords){
   const params = new URLSearchParams();
   params.append(`lat`,coords.lat);
   params.append(`lon`,coords.lon);
@@ -36,19 +51,72 @@ function getWalkTime(startCoords, endCoords) {
   return fetch(`${mapsURL}?${params.toString()}`);
 }
 
+//extract train times from keys to to String 
+function getStringETA(trains) {
+  res = ""
+  for (var route in trains) {
+      let eta = ""
+      
+      //formatting same route North trains on same line
+      for (let i = 0; i < Math.min(trains[route].length,4); i++) {
+        eta += `${trains[route][i]}, `;
+      }
+
+      eta = eta.substring(0,eta.length-2);
+      res += `<p>Route: ${route}&nbsp;&nbsp;&nbsp;ETA: ${eta} mins</p>`;
+    }
+
+  return res;
+
+}
+
+async function getBusData(coords){
+  const busStopsURL = 'https://bustime.mta.info/api/where/stops-for-location.json'
+  const busStopQueryURL = 'https://bustime.mta.info/api/siri/stop-monitoring.json';
+  let params = new URLSearchParams();
+  params.append('lat', coords.lat);
+  params.append('lon', coords.lon);
+  params.append('latSpan', 0.005);
+  params.append('lonSpan', 0.005);
+  params.append('key', process.env.BUS_API_KEY);
+  nearbyStops = await fetch(`${busStopsURL}?${params.toString()}`);
+  nearbyStops = await nearbyStops.json();
+  nearbyStops = nearbyStops.data.stops;
+  //console.log(nearbyStops);
+  const stops = {};
+  for (let i = 0; i < Math.min(3,nearbyStops.length); i++){
+    //stops.push(nearbyStops[i].code);
+    params = new URLSearchParams();
+    params.append('version',2);
+    params.append('StopMonitoringDetailLevel','minimum');
+    params.append('key', process.env.BUS_API_KEY);
+    params.append('MonitoringRef',nearbyStops[i].code);
+    stopRes = await fetch(`${busStopQueryURL}?${params.toString()}`)
+    stopRes = await stopRes.json();
+    //console.log(stopRes);
+    stopRes = stopRes.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit;
+    //console.log(stopRes);
+    stops[nearbyStops[i].name]=stopRes;
+  }
+  return stops;
+}
+
+
+
+
+
 //function for display data
 
 async function displayData() {
   let position = await getCoordinates();
-  let transitData = await getTransitData({"lat":position.coords.latitude,"lon":position.coords.longitude});
+  userCoords = {"lat":position.coords.latitude,"lon":position.coords.longitude};
+  statusDiv.innerHTML = `Got user location! Getting transit data...`
+  let transitData = await getTrainData(userCoords);
   let data = await transitData.json();
-  //console.log(data.data);
-  
-
   data = data.data;
+  //getBusData(userCoords);
+  
   //loop through data and format
-  //
-
   let output = "";
   // iterate over the first 3 stations
   for (let i = 0; i < 3; i++) {
@@ -64,13 +132,13 @@ async function displayData() {
 
 
     // generate HTML for station
-    output += `<div class="station ${data[i].name.toLowerCase().replace(/\s+/g, '-')}>`;
-    output += `<p class="station-name">${data[i].name}&nbsp;&nbsp;&nbsp;&nbsp;&#128694;${time}mins</p>`;
-
+    //output += `<div class="content ${data[i].name.toLowerCase().replace(/\s+/g, '-')}">`;
+    output += `<h2 class="station-name">${data[i].name}&nbsp;&nbsp;&nbsp;&nbsp;&#128694;${time}mins</h2>`;
+  
     // northbound trains
     output += `<div class="direction north">`;
     output += `<p>Northbound Trains</p>`;
-    for (let i2 = 0; i2 < Math.min(4,north.length); i2++) {
+    for (let i2 = 0; i2 < north.length; i2++) {
 
       let minsN = Math.round((new Date(north[i2].time) - Date.now()) / (1000 * 60));
       // update northbound trains object
@@ -80,24 +148,13 @@ async function displayData() {
         trainsN[data[i].N[i2].route].push(minsN);
       }
     }
-    for (var route in trainsN) {
-      let eta = ""
-      
-      //formatting same route North trains on same line
-      for (let i = 0; i < trainsN[route].length; i++) {
-        eta += `${trainsN[route][i]}, `;
-        
-      }
-      eta = eta.substring(0,eta.length-2);
-      output += `<p>Route: ${route}&nbsp;&nbsp;&nbsp;ETA: ${eta} mins</p>`;
-
-    }
-    output += `</div>`;
+    output += getStringETA(trainsN);
+    //output += `</div>`;
 
     // southbound trains
     output += `<div class="direction south">`;
     output += `<p>Southbound Trains</p>`;
-    for (let i2 = 0; i2 < Math.min(4,south.length); i2++) {
+    for (let i2 = 0; i2 < south.length; i2++) {
       let minsS = Math.round((new Date(south[i2].time) - Date.now()) / (1000 * 60));
       // update southbound trains object
       if (!(south[i2].route in trainsS)) {
@@ -105,24 +162,51 @@ async function displayData() {
       } else {
         trainsS[south[i2].route].push(minsS);
       }
-      //output += `<p>Route: ${south[i2].route}, ETA: ${minsS} mins</p>`;
     }
-    for (var route in trainsS) {
-      let eta = ""
-      
-      //formatting same route & dir ETA on one line
-      for (let i = 0; i < trainsS[route].length; i++) {
-        eta += `${trainsS[route][i]}, `;
-      }
-      eta = eta.substring(0,eta.length-2);
-      
-      output += `<p>Route: ${route}&nbsp;&nbsp;&nbsp;ETA: ${eta} mins</p>`;
-    }
+    
+    output += getStringETA(trainsS)
     output += `</div>`;
     output += `</div>`;
   }
   statusDiv.remove();
-  responseDiv.innerHTML = `<div class="stations">${output}</div>`;
+  trainResDiv.innerHTML = `${output}`;
+  
+  //updating buses
+  //output = `<h1>Nearby Bus Stops</h1>`;
+  busData = await getBusData(userCoords);
+  upcomingBuses = {};
+
+  //aggregate all fetched bus data into upcoming buses, merge by routes
+  for (let busStop in busData){
+    upcomingBuses[busStop] = {};
+    console.log(busData[busStop]);
+    for (let i = 0; i < busData[busStop].length; i++){
+      bus_i = busData[busStop][i].MonitoredVehicleJourney;
+      if (!(bus_i.PublishedLineName[0] in upcomingBuses[busStop])){
+        upcomingBuses[busStop][bus_i.PublishedLineName[0]] = [[bus_i.DestinationName[0]],[bus_i.MonitoredCall.ArrivalProximityText]];
+        console.log(upcomingBuses);
+      } else {
+        upcomingBuses[busStop][bus_i.PublishedLineName[0]][1].push(bus_i.MonitoredCall.ArrivalProximityText);
+      }
+    }
+  }
+
+  //format output bus data
+  for (let nearbyStop in upcomingBuses){
+    output = `<div class="content">`;
+    output += `<h2>${nearbyStop}</h2>`;
+    for (let bus in upcomingBuses[nearbyStop]){
+      output += `<p>${bus} ---> ${upcomingBuses[nearbyStop][bus][0]}</p>`;
+      eta = "";
+
+      for (let i = 0; i < Math.min(3,upcomingBuses[nearbyStop][bus][1].length); i++){
+        eta += `${upcomingBuses[nearbyStop][bus][1][i]}, `;
+      }
+      output += `<p>ETA: ${eta.substring(0,eta.length-2)}</p>`;
+    }
+    output += `</div>`;
+  }
+  busResDiv.innerHTML = output;
 }
 
 
