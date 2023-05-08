@@ -1,5 +1,24 @@
 {
   "dependencies": {
     "express": "^4.18.2"
-  }
+  },
+  "scripts": {
+    "start": "node server.js",
+    "build": "webpack"
+  },
+  "name": "transitping",
+  "version": "1.0.0",
+  "main": "src/javascript/index.js",
+  "devDependencies": {},
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mwang822/transitping.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/mwang822/transitping/issues"
+  },
+  "homepage": "https://github.com/mwang822/transitping#readme",
+  "description": ""
 }
