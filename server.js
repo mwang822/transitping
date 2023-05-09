@@ -10,5 +10,5 @@ app.use(express.static(path.resolve(__dirname, 'src', 'javascript')));
 app.get("/*", (req, res) => {
   res.sendFile(path.resolve(__dirname,"public", "dist", "index.html"));
 });
-
+console.log(process.env.BUS_API_KEY);
 app.listen(process.env.PORT || port, () => console.log(`Server running on port ${port}...`));

@@ -4,6 +4,14 @@ const statusDiv = document.getElementById('status');
 let baseURL = `https://transitping-mtapi.onrender.com`;
 console.log(process.env.MAP_API_KEY);
 //console.log(document.getElementById('transitResponse');
+const button = document.querySelectortor('#toggle-button');
+button.addEventListener("click", toggleView);
+
+
+
+//const container = document.querySelector('.container');
+//let touchStartX = 0;
+//let touchEndX = 0;
 
 
 // extract a function to get coordinates

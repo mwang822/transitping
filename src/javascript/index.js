@@ -4,22 +4,24 @@ const statusDiv = document.getElementById('status');
 let transitURL = `https://transitping-mtapi.onrender.com/by-location`;
 const mapsURL = `https://dev.virtualearth.net/REST/v1/Routes/walking`;
 
-document.addEventListener('DOMContentLoaded', function () {
-  // Display the button and content after the page finishes loading
-  document.querySelector('.collapsible').style.display = 'block';
-  document.querySelector('.content').style.display = 'block';
 
-  // Add click event listener to toggle the collapsible content
-  document.querySelector('.collapsible').addEventListener('click', function() {
-    this.classList.toggle('active');
-    var content = this.nextElementSibling;
-    if (content.style.display === 'block') {
-      content.style.display = 'none';
-    } else {
-      content.style.display = 'block';
-    }
-  });
-});
+function toggleView() {
+    const trainView = document.querySelector(".train-view");
+    const busView = document.querySelector(".bus-view");
+
+    if (trainView.style.display === 'none'){
+    trainView.style.display = 'block';
+    busView.style.display = 'none';
+  } else {
+    trainView.style.display = 'none';
+    busView.style.display = 'block';
+  }
+}
+ 
+const button = document.querySelector('#toggle-button');
+button.addEventListener("click", toggleView);
+
+
 
 // extract a function to get coordinates
 function getCoordinates() {
@@ -71,20 +73,20 @@ function getStringETA(trains) {
 }
 
 async function getBusData(coords){
-  const busStopsURL = 'https://bustime.mta.info/api/where/stops-for-location.json'
+  const busStopsURL = 'https://bustime.mta.info/api/where/stops-for-location.json';
   const busStopQueryURL = 'https://bustime.mta.info/api/siri/stop-monitoring.json';
-  let params = new URLSearchParams();
-  params.append('lat', coords.lat);
-  params.append('lon', coords.lon);
-  params.append('latSpan', 0.005);
-  params.append('lonSpan', 0.005);
+  params = new URLSearchParams();
+  params.append(`lat`, `${coords.lat}`);
+  params.append(`lon`, `${coords.lon}`);
+
+  params.append(`latSpan`, 0.005);
+  params.append(`longSpan`, 0.005);
   params.append('key', process.env.BUS_API_KEY);
-  nearbyStops = await fetch(`${busStopsURL}?${params.toString()}`);
-  nearbyStops = await nearbyStops.json();
+  nearbyStops = await (await fetch(`${busStopsURL}?${params.toString()}`)).json();
   nearbyStops = nearbyStops.data.stops;
-  //console.log(nearbyStops);
+  console.log(nearbyStops);
   const stops = {};
-  for (let i = 0; i < Math.min(3,nearbyStops.length); i++){
+  for (let i = 0; i < Math.min(4,nearbyStops.length); i++){
     //stops.push(nearbyStops[i].code);
     params = new URLSearchParams();
     params.append('version',2);
@@ -172,7 +174,7 @@ async function displayData() {
   trainResDiv.innerHTML = `${output}`;
   
   //updating buses
-  //output = `<h1>Nearby Bus Stops</h1>`;
+  output = `<h1>Nearby Bus Stops</h1>`;
   busData = await getBusData(userCoords);
   upcomingBuses = {};
 
@@ -193,7 +195,7 @@ async function displayData() {
 
   //format output bus data
   for (let nearbyStop in upcomingBuses){
-    output = `<div class="content">`;
+    output += `<div class="station">`;
     output += `<h2>${nearbyStop}</h2>`;
     for (let bus in upcomingBuses[nearbyStop]){
       output += `<p>${bus} ---> ${upcomingBuses[nearbyStop][bus][0]}</p>`;
@@ -205,6 +207,7 @@ async function displayData() {
       output += `<p>ETA: ${eta.substring(0,eta.length-2)}</p>`;
     }
     output += `</div>`;
+    console.log(output)
   }
   busResDiv.innerHTML = output;
 }

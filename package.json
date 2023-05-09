@@ -9,7 +9,10 @@
   "name": "transitping",
   "version": "1.0.0",
   "main": "src/javascript/index.js",
-  "devDependencies": {},
+  "devDependencies": {
+    "dotenv-webpack": "^8.0.1",
+    "webpack-cli": "^5.1.0"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/mwang822/transitping.git"
