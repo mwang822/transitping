@@ -1,26 +1,22 @@
-const trainResDiv = document.getElementById('trainResponse');
-const busResDiv = document.getElementById('busResponse');
 const statusDiv = document.getElementById('status');
-let transitURL = `https://transitping-mtapi.onrender.com/by-location`;
+const transitURL = `https://transitping-mtapi.onrender.com/by-location`;
 const mapsURL = `https://dev.virtualearth.net/REST/v1/Routes/walking`;
+const container = document.getElementById('container');
+const button = document.querySelector('.toggle-button');
+const busView = document.querySelector('.bus-view');
+const trainView = document.querySelector('.train-view');
 
+button.addEventListener('click', () => {
+  // toggle the "active" class on both views
+  trainView.classList.toggle('active');
+  busView.classList.toggle('active');
 
-function toggleView() {
-    const trainView = document.querySelector(".train-view");
-    const busView = document.querySelector(".bus-view");
-
-    if (trainView.style.display === 'none'){
-    trainView.style.display = 'block';
-    busView.style.display = 'none';
-  } else {
-    trainView.style.display = 'none';
-    busView.style.display = 'block';
-  }
-}
- 
-const button = document.querySelector('#toggle-button');
-button.addEventListener("click", toggleView);
-
+  // wait for the transition to complete, then toggle the "slide" class
+  setTimeout(() => {
+    trainView.classList.toggle('slide');
+    busView.classList.toggle('slide');
+  }, 300); // 300ms = duration of the transition
+});
 
 
 // extract a function to get coordinates
@@ -96,9 +92,12 @@ async function getBusData(coords){
     stopRes = await fetch(`${busStopQueryURL}?${params.toString()}`)
     stopRes = await stopRes.json();
     //console.log(stopRes);
-    stopRes = stopRes.Siri.ServiceDelivery.StopMonitoringDelivery[0].MonitoredStopVisit;
+
+    stopRes = stopRes.Siri.ServiceDelivery.StopMonitoringDelivery[0];//.MonitoredStopVisit;
+    if ("MonitoredStopVisit" in stopRes) {
+      stops[nearbyStops[i].name]=stopRes["MonitoredStopVisit"];
+    }
     //console.log(stopRes);
-    stops[nearbyStops[i].name]=stopRes;
   }
   return stops;
 }
@@ -171,7 +170,7 @@ async function displayData() {
     output += `</div>`;
   }
   statusDiv.remove();
-  trainResDiv.innerHTML = `${output}`;
+  trainView.innerHTML = `${output}`;
   
   //updating buses
   output = `<h1>Nearby Bus Stops</h1>`;
@@ -181,12 +180,12 @@ async function displayData() {
   //aggregate all fetched bus data into upcoming buses, merge by routes
   for (let busStop in busData){
     upcomingBuses[busStop] = {};
-    console.log(busData[busStop]);
+    console.log(busData);
     for (let i = 0; i < busData[busStop].length; i++){
       bus_i = busData[busStop][i].MonitoredVehicleJourney;
       if (!(bus_i.PublishedLineName[0] in upcomingBuses[busStop])){
         upcomingBuses[busStop][bus_i.PublishedLineName[0]] = [[bus_i.DestinationName[0]],[bus_i.MonitoredCall.ArrivalProximityText]];
-        console.log(upcomingBuses);
+        //console.log(upcomingBuses);
       } else {
         upcomingBuses[busStop][bus_i.PublishedLineName[0]][1].push(bus_i.MonitoredCall.ArrivalProximityText);
       }
@@ -209,7 +208,7 @@ async function displayData() {
     output += `</div>`;
     console.log(output)
   }
-  busResDiv.innerHTML = output;
+  busView.innerHTML = output;
 }
 
 

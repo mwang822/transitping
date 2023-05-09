@@ -8,14 +8,16 @@
   <script defer src="main.js"></script>
 </head>
 <body>
- <div class="container">
-    <div class="train-view" id="trainResponse">
+ <div class="container" id="container">
+    <div class="train-view active slide" id="trainResponse">
       <!-- Data will be dynamically generated here -->
         </div>
     <div class="bus-view" id="busResponse">
       <!-- Data will be dynamically generated here -->
         </div>
-    <button class="toggle-view" id="toggle-button">toggleview</button>
+      <div class="button-container">
+        <button class="toggle-button" id="toggle-button">toggleview</button>
+      </div>
   </div>
   <div id="status">Getting Location</div>
 </body>
