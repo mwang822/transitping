@@ -6,8 +6,9 @@
 
 body {
   font-family: sans-serif;
-  text-align: center;
+  text-align: centeri;
 }
+
 
 .container {
   position: absolute;
@@ -22,9 +23,15 @@ h1 {
   margin-bottom: 20px;
 }
 
-.station-name h2 {
+h2 {
   font-weight: bold;
+  font-size: 30px;
 }
+
+h3 {
+  font-size: 22px;
+}
+
 
 .station {
   padding: 20px;

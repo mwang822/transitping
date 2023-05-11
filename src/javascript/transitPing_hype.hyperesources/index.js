@@ -1,27 +1,24 @@
-//const statusDiv = document.getElementById('status');
+const statusDiv = document.getElementById('status');
 const transitURL = `https://transitping-mtapi.onrender.com/by-location`;
 const mapsURL = `https://dev.virtualearth.net/REST/v1/Routes/walking`;
-//const container = document.getElementById('container');
+const container = document.getElementById('container');
 //const button = document.querySelector('.toggle-button');
-//const trainView = document.querySelector('.train-view');
-//button.addEventListener('click', () => {
-  // toggle the "active" class on both views
-//  trainView.classList.toggle('active');
-//  busView.classList.toggle('active');
-  // wait for the transition to complete, then toggle the "slide" class
-//  setTimeout(() => {
- //   trainView.classList.toggle('slide');
- //   busView.classList.toggle('slide');
- // }, 300); // 300ms = duration of the transition
-//});
-window.onload = function () {
-  trainView = document.querySelector('.train.view.body');
-  button = document.querySelector('.toggle.button');
-  busView = document.querySelector('.bus.view.body');
-  console.log("loaded");
+const busView = document.querySelector('.bus-view');
+const trainView = document.querySelector('.train-view');
 
-  displayData().catch(error => console.log(error));
-}
+const button = document.getElementById('hype-obj-VR5CMFKT0RJZ0AJUPH64');
+button.addEventListener('click', () => {
+  // toggle the "active" class on both views
+  trainView.classList.toggle('active');
+  busView.classList.toggle('active');
+
+  // wait for the transition to complete, then toggle the "slide" class
+  setTimeout(() => {
+    trainView.classList.toggle('slide');
+    busView.classList.toggle('slide');
+  }, 300); // 300ms = duration of the transition
+});
+
 
 // extract a function to get coordinates
 function getCoordinates() {
@@ -29,6 +26,7 @@ function getCoordinates() {
     navigator.geolocation.getCurrentPosition(resolve, reject);
   });
 }
+
 
 
 
@@ -80,7 +78,7 @@ async function getBusData(coords){
 
   params.append(`latSpan`, 0.005);
   params.append(`longSpan`, 0.005);
-  params.append('key', "process.env.BUS_API_KEY");
+  params.append('key', process.env.BUS_API_KEY);
   nearbyStops = await (await fetch(`${busStopsURL}?${params.toString()}`)).json();
   nearbyStops = nearbyStops.data.stops;
   console.log(nearbyStops);
@@ -113,12 +111,12 @@ async function getBusData(coords){
 
 async function displayData() {
   let position = await getCoordinates();
-  userLoc = {"lat":position.coords.latitude,"lon":position.coords.longitude};
-  //statusDiv.innerHTML = `Got user location! Getting transit data...`
-  let transitData = await getTrainData(userLoc);
+  userCoords = {"lat":position.coords.latitude,"lon":position.coords.longitude};
+  statusDiv.innerHTML = `Got user location! Getting transit data...`
+  let transitData = await getTrainData(userCoords);
   let data = await transitData.json();
   data = data.data;
-  //getBusData(userLoc);
+  //getBusData(userCoords);
   
   //loop through data and format
   let output = "";
@@ -172,16 +170,12 @@ async function displayData() {
     output += `</div>`;
     output += `</div>`;
   }
-  //statusDiv.remove();
-  const trainViewBody = document.createElement('div');
-  trainViewBody.style.width = 'auto';
-  trainViewBody.style.height = 'auto';
-  trainViewBody.style.opacity = '80%';
+  statusDiv.remove();
   trainView.innerHTML = `${output}`;
   
   //updating buses
   output = `<h1>Nearby Bus Stops</h1>`;
-  busData = await getBusData(userLoc);
+  busData = await getBusData(userCoords);
   upcomingBuses = {};
 
   //aggregate all fetched bus data into upcoming buses, merge by routes
@@ -215,11 +209,11 @@ async function displayData() {
     output += `</div>`;
     console.log(output)
   }
-  console.log('here');
-  busView.innerHTML = `${output}`;
+  busView.innerHTML = output;
 }
 
 
+displayData().catch(error => console.log(error));
 
 
 
