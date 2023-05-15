@@ -55,8 +55,8 @@ app.get('/data/bus_stop', (req, res) =>{
 app.get('/data/walk_time', (req,res) => {
   //console.log(req.query.wayPoint1);
   params = new URLSearchParams();
-  params.append(`wayPoint.1`,`${req.query.wayPoint1}`);
-  params.append(`wayPoint.2`,`${req.query.wayPoint2}`);
+  params.append(`wayPoint.1`,req.query.wayPoint1);
+  params.append(`wayPoint.2`,req.query.wayPoint2);
   params.append(`key`,`${process.env.MAP_API_KEY}`);
   const url = `https://dev.virtualearth.net/REST/v1/Routes/walking?${params.toString()}&ra=routeSummariesOnly`;
   console.log(url);
