@@ -20,6 +20,8 @@ app.use(function(req, res, next) {
   res.setHeader('Access-Control-Allow-Credentials', true);
   next();
 });
+
+//proxy nearby stops endpoint
 app.get('/data/nearby_bus', (req, res) => {
   const userLat = req.query.lat;
   console.log(userLat);
@@ -29,7 +31,6 @@ app.get('/data/nearby_bus', (req, res) => {
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      console.log(data);
       // send response to the client
       res.send(data);
     })
@@ -38,13 +39,14 @@ app.get('/data/nearby_bus', (req, res) => {
       res.status(500).send('Error fetching remote resource');
   });
 });
+
+//Proxy bustime stop-monitoring endoing 
 app.get('/data/bus_stop', (req, res) =>{
   const stopRef = req.query.MonitoringRef;
   const url = `https://bustime.mta.info/api/siri/stop-monitoring.json?version=2&StopMonitoringDetailLevel=minimum&MonitoringRef=${req.query.MonitoringRef}&key=${process.env.BUS_API_KEY}`;
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      //console.log(data);
       //send response back to client
       res.send(data);
     }).catch(error => {
@@ -52,18 +54,18 @@ app.get('/data/bus_stop', (req, res) =>{
       res.status(500).send('Error fetching remote resource');
     });
 });
+
+//Proxy walk-time endpoint 
 app.get('/data/walk_time', (req,res) => {
-  //console.log(req.query.wayPoint1);
   params = new URLSearchParams();
   params.append(`wayPoint.1`,req.query.wayPoint1);
   params.append(`wayPoint.2`,req.query.wayPoint2);
   params.append(`key`,`${process.env.MAP_API_KEY}`);
   const url = `https://dev.virtualearth.net/REST/v1/Routes/walking?${params.toString()}&ra=routeSummariesOnly`;
-  console.log(url);
+  //console.log(url);
   fetch(url)
     .then(response => response.json())
     .then(data => {
-      console.log(data);
       res.send(data);
 
     }).catch(error => {
