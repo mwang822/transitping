@@ -24,9 +24,8 @@ app.use(function(req, res, next) {
 //proxy nearby stops endpoint
 app.get('/data/nearby_bus', (req, res) => {
   const userLat = req.query.lat;
-  console.log(userLat);
   const userLon = req.query.lon;
-  const url = `http://bustime.mta.info/api/where/stops-for-location.json?lat=${userLat}&lon=${userLon}&latSpan=0.005&longSpan=0.005&key=${process.env.BUS_API_KEY}`;
+  const url = `https://bustime.mta.info/api/where/stops-for-location.json?lat=${userLat}&lon=${userLon}&latSpan=0.005&longSpan=0.005&key=${process.env.BUS_API_KEY}`;
   // Fetch request inside the Express route handler
   fetch(url)
     .then(response => response.json())
