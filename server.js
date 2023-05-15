@@ -6,6 +6,8 @@ const { hostname } = require("os");
 const path = require("path");
 const app = express();
 const port = 5070;
+const dotenv = require('dotenv');
+dotenv.config();
 
 const fetch = (...args) =>
 	import('node-fetch').then(({default: fetch}) => fetch(...args));
@@ -23,7 +25,7 @@ app.get('/data/nearby_bus', (req, res) => {
   const userLat = req.query.lat;
   console.log(userLat);
   const userLon = req.query.lon;
-  const url = `http://bustime.mta.info/api/where/stops-for-location.json?lat=${userLat}&lon=${userLon}&latSpan=0.005&longSpan=0.005&key=d7cdf7f2-042c-4657-993f-97823a8bd34d`;
+  const url = `http://bustime.mta.info/api/where/stops-for-location.json?lat=${userLat}&lon=${userLon}&latSpan=0.005&longSpan=0.005&key=${process.env.BUS_API_KEY}`;
   // Fetch request inside the Express route handler
   fetch(url)
     .then(response => response.json())
@@ -39,7 +41,7 @@ app.get('/data/nearby_bus', (req, res) => {
 });
 app.get('/data/bus_stop', (req, res) =>{
   const stopRef = req.query.MonitoringRef;
-  const url = `https://bustime.mta.info/api/siri/stop-monitoring.json?version=2&StopMonitoringDetailLevel=minimum&MonitoringRef=${req.query.MonitoringRef}&key=d7cdf7f2-042c-4657-993f-97823a8bd34d`;
+  const url = `https://bustime.mta.info/api/siri/stop-monitoring.json?version=2&StopMonitoringDetailLevel=minimum&MonitoringRef=${req.query.MonitoringRef}&key=${process.env.BUS_API_KEY}`;
   fetch(url)
     .then(response => response.json())
     .then(data => {
@@ -55,6 +57,5 @@ app.get('/data/bus_stop', (req, res) =>{
 app.get("/*", (req, res) => {
   res.sendFile(path.resolve(__dirname,"public", "dist", "index.html"));
 });
-
 
 app.listen(process.env.PORT || port, '0.0.0.0', () => console.log(`Server running on port ${port}...`));
